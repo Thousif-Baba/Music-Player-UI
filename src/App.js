@@ -1,25 +1,43 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
+import Profile from './components/Profile';
+import SongsList from './components/SongsList';
+import Player from './components/Player';
 import './App.css';
 
-function App() {
+const App = () => {
+  const [songs, setSongs] = useState([]);
+  const [currentSong, setCurrentSong] = useState(null);
+  const [showSongsList, setShowSongsList] = useState(true);
+
+  useEffect(() => {
+    fetch('https://cms.samespace.com/items/songs')
+      .then((response) => response.json())
+      .then((data) => {
+        setSongs(data.data);
+        setCurrentSong(data.data[0]);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (currentSong) {
+      document.body.style.background = `linear-gradient(to right, ${currentSong.accent}, black)`;
+    }
+  }, [currentSong]);
+
+  const toggleSongsList = () => {
+    setShowSongsList(!showSongsList);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Profile />
+      <button className="menu-button" onClick={toggleSongsList}>
+        {showSongsList ? 'Hide Songs' : 'List Songs'}
+      </button>
+      {showSongsList && <SongsList songs={songs} setCurrentSong={setCurrentSong} />}
+      {currentSong && <Player song={currentSong} songs={songs} setCurrentSong={setCurrentSong} />}
     </div>
   );
-}
+};
 
 export default App;
